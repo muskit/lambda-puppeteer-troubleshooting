@@ -1,54 +1,38 @@
-FROM shivjm/node-chromium:node18-chromium110-alpine
+FROM node:18-buster
 
 ARG FUNCTION_DIR=/app
 WORKDIR ${FUNCTION_DIR}
 ENV NODE_ENV=production
 
-# puppeteer vars for node-chromium alpine
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
-
-# chromium dependencies -- prob not necessary for this image
-RUN apk add --no-cache \
-    udev \
-    ttf-freefont \
-    nss \
-    freetype \
-    freetype-dev \
-    harfbuzz \
-    ca-certificates \
-    fontconfig \
-    curl
+# ensure packages are up to date
+RUN apt-get update && apt-get upgrade -y
 
 # for aws-lambda-ric
-RUN apk add --no-cache --update --repository=https://dl-cdn.alpinelinux.org/alpine/v3.16/main/ libexecinfo-dev
-RUN apk add --no-cache \
-    libstdc++ \
-    build-base \
-    libtool \
-    autoconf \
-    automake \
-    cmake \
-    libcurl \
+RUN apt-get install -y \
     g++ \
     make \
+    cmake \
     unzip \
-    curl-dev \
-    python3
+    libcurl4-openssl-dev
 RUN npm i aws-lambda-ric
+
+# chromium
+RUN apt-get install chromium -y
 
 COPY package*.json ./
 RUN npm ci
-
-COPY src ./src
-COPY bootstrap ./
 
 ### AWS DEPLOYMENT ###
 # Required for Node runtimes which use npm@8.6.0+ because
 # by default npm writes logs under /home/.npm and Lambda fs is read-only
 ENV NPM_CONFIG_CACHE=/tmp/.npm
 
-# Set runtime interface client as default command for the container runtime
 EXPOSE 8080
+
+COPY bootstrap ./
+COPY src ./src
+
+# Set runtime interface client as default command for the container runtime
 ENTRYPOINT ["./bootstrap"]
 
 # Pass the name of the function handler as an argument to the runtime

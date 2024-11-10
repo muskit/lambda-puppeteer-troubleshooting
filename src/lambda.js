@@ -1,4 +1,11 @@
-import puppeteer from "puppeteer-core";
+// import { safeLaunchBrowser } from "./browser-retry.js";
+import { createBrowser } from "./browser.js";
+
+async function heartbeat(n = 0) {
+    console.log(`heartbeat: ${n}`)
+    setTimeout(() => heartbeat(n + 1), 500)
+}
+// heartbeat();
 
 export const handler = awslambda.streamifyResponse(async (event, responseStream) => {
     console.log("start of handler...")
@@ -8,15 +15,7 @@ export const handler = awslambda.streamifyResponse(async (event, responseStream)
     responseStream.write("initializing browser...\n")
     const timeStart = performance.now()
 
-    const browser = await puppeteer.launch({
-        args: ['--no-sandbox', '--disable-accelerated-2d-canvas', '--disable-gpu', '--disable-software-rasterizer', '--no-zygote'],
-        defaultViewport: { width: 1366, height: 768 },
-        ignoreHTTPSErrors: true,
-        executablePath: "/usr/bin/chromium-browser",
-        headless: true,
-        timeout: 0,
-        dumpio: true,
-    })
+    const browser = await createBrowser()
     console.log("browser initialized!")
 
     responseStream.write(`[${performance.now() - timeStart}] browsing to example.com...\n`)

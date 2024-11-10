@@ -11,6 +11,6 @@
   "description": "",
   "dependencies": {
     "aws-lambda-ric": "^3.2.1",
-    "puppeteer-core": "^23.7.0"
+    "puppeteer-core": "^23.7.1"
   }
 }
