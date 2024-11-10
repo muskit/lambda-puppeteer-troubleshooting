@@ -39,13 +39,14 @@ const MINIMAL_ARGS = [
     '--allow-insecure-localhost',
 ];
 
-export async function createBrowser() {
+export function createBrowser() {
     return puppeteer.launch({
-        executablePath: "/usr/bin/chromium",
+        // executablePath: "/usr/bin/chromium",
+        executablePath: "/usr/bin/google-chrome-stable",
         args: MINIMAL_ARGS,
         defaultViewport: { width: 1366, height: 768 },
         ignoreHTTPSErrors: true,
-        headless: 'shell',
+        headless: true,
         timeout: 500,
         dumpio: true,
     })
